@@ -1,0 +1,62 @@
+RX16 A-004 RAM switch reset: offline evidence, 2026-10-02
+
+Source ROM SHA256:
+579160f5015887672b586c0bc5c3400735c4c957bf69ad972e83de6753f0ea62
+
+Manufacturer Setup variable:
+GUID ec87d643-eba4-4bb5-a1e5-3f3e36b20da9, size 0xC9.
+OEM Memory Configuration form 0x279C:
+  Active Memory Timing Settings: question 0x25, offset 0xAF, byte.
+  Auto=0xFF, Enabled=0x01.
+  Memory Target Speed: questions 0x26/0x27, offset 0xB0, UINT16, MT/s.
+  Original choice lists: 4800/5200/5600 or only 4800, conditional on
+  hardware information. The menu help mentions lower speeds but the
+  original choices do not offer them.
+
+AMD CBS variable:
+AmdSetupPHX, GUID 3a997502-647a-4c82-998e-52ef9486a247, size 0x67F.
+  Active Memory Timing Settings: offset 0x5E, byte, FF=Auto, 01=Enabled.
+  Memory Target Speed: offset 0x5F, UINT16, MT/s.
+
+OemSyncCBSSetup module GUID b85bdafe-60bc-4cf8-9cb0-73ff5bbc5b0d:
+  Callback at RVA 0x9B4 reads Setup to [rsp+0x70]. RBP=RSP+0x100.
+  Therefore [rbp+0x1F] is Setup[0xAF] and [rbp+0x20] is Setup[0xB0].
+  AmdSetupPHX is read into the buffer addressed by RBX.
+  RVA 0xB9E-0xBB0: when OEM timing is FF and AMD timing differs, copy FF
+    into AMD offset 0x5E and flag the variable as changed.
+  RVA 0xBB3-0xBC8: when OEM timing is 01 and the target speeds DIFFER,
+    copy OEM speed into AMD offset 0x5F and set AMD timing to 01.
+    If the target speeds already match, this block skips enabling it.
+  RVA 0xC31-0xC58: changed AmdSetupPHX buffer is submitted to SetVariable;
+    subsequent code also communicates with SMM and requests a reset.
+
+These instructions explain the reported pattern: target speed persists
+while the timing-enable flag returns to Auto. Live before/after logging is
+still needed to establish every value on the current machine.
+
+Temporary menu change
+Only OEM form 0x279C is replaced: its two target-speed questions become
+numeric, with a minimum of 3200 and step 200. Upper limits and defaults
+remain 5600/4800 as originally defined. Field sizes, offsets, IDs, native
+configuration owner, access conditions, and timing switch are preserved.
+Two AMITSE data-table bytes temporarily route the Advanced tab to this page.
+No executable firmware instructions are patched. No flash command or
+SetVariable call exists in the application; the user saves through BIOS.
+
+UEFI reference for numeric questions and nested defaults:
+https://uefi.org/specs/UEFI/2.10/33_Human_Interface_Infrastructure.html#efi-ifr-numeric
+
+Validation
+Compiled with LLVM warnings treated as errors. Tests used the real Setup
+package and AMITSE image, independently checked parsed controls/scopes,
+tested exact undo and mismatched firmware, 196 targeted form mutations,
+1000 random package mutations, truncation, and insufficient output space.
+IFRExtractor separately decoded the generated package and confirmed both
+numeric questions and original variable bindings. x64 EFI subsystem and
+absence of OS imports verified.
+
+Unresolved hardware questions
+Whether this BIOS save path accepts the extended OEM speed range; whether
+subsequent original menu validation normalizes it; and whether this CPU/RAM
+combination trains and remains at 3200. The package is a targeted test,
+not a verified persistent underclock.
