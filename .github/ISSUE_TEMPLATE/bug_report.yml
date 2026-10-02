@@ -1,0 +1,44 @@
+name: Bug report
+description: Report an RX16 Toolkit problem without uploading private firmware.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Include only reviewed logs. Do not upload ROM dumps, serial numbers, keys, or personal CPU-Z reports."
+  - type: input
+    id: bios
+    attributes:
+      label: Exact BIOS version and board model
+      placeholder: CT_BI_AMI_RX16_AKN79C_A-004 / AKN79C_H
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Toolkit version and EFI SHA-256
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - U - advanced menus
+        - M - RAM controls
+        - D - diagnostics
+        - Application would not launch
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Steps, expected result, and actual result
+      description: For RAM, say whether the setting reverts or remains selected while the measured frequency is unchanged.
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Reviewed log or exact error
+      description: Paste relevant RX16_TOOLKIT_LOG.txt content after reviewing it for privacy.
+      render: text

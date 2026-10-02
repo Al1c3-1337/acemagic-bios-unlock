@@ -1,0 +1,50 @@
+RX16 Toolkit 1.0.0-rc.1
+ACEMAGIC RX16 / AKN79C_H / CT_BI_AMI_RX16_AKN79C_A-004 only
+
+This combined release candidate passed offline checks. The owner confirmed
+both separate tools work; this exact combined binary still needs a hardware
+smoke test. Read README.md for compatibility, risks and troubleshooting.
+
+1. Extract this USB package's CONTENTS to a FAT32 USB root. Preserve existing
+   USB files before replacing them. EFI\BOOT\BOOTX64.EFI must be present.
+2. Boot the USB's UEFI entry, or run RX16Toolkit.efi in your EFI shell.
+   The app is unsigned; Secure Boot may refuse it. No shell script is needed.
+3. Choose a mode below, then press O to open the original BIOS.
+
+U -- ADVANCED MENUS
+In Main, set Setup Item Hide Control = Disabled. Save and Exit (normally F10).
+Reboot without the USB and confirm the advanced menus persist.
+
+M -- RAM CONTROLS (unlock advanced menus first)
+First save: in Memory Configuration, set Active Memory Timing Settings to
+Enabled and Memory Target Speed to 3200 MT/s. Save and reboot.
+Second save: enter regular BIOS > AMD CBS > UMC Common Options > DDR Options
+> DDR Timing Configuration > Accept. Set Active Memory Timing Settings to
+Enabled AGAIN, confirm target 3200, and save again.
+CPU-Z's Memory tab should show around 1600 MHz for DDR5-3200. Reboot again
+to check persistence. The SPD tab does not show the current operating speed.
+
+D -- DIAGNOSTICS
+Reads a small set of saved settings without changing them. A log is written
+at launch even if you simply press Q to exit. RX16_TOOLKIT_LOG.txt is replaced
+each launch, so copy it before another run if needed.
+
+After selecting a mode:
+O = open original BIOS; D = read settings; Q = return; R = undo menu edits.
+If O does not open BIOS, use Q and Enter Setup in the SAME boot.
+Reboot before switching modes or using another menu tool.
+
+Menu edits are temporary. Settings YOU SAVE in BIOS may persist. R and
+removing the USB do not undo saved settings. RAM changes can prevent boot;
+no guaranteed recovery procedure is provided. Leave timings and voltages
+unchanged. Do not load all BIOS defaults merely to undo a RAM change.
+
+If a check fails, stop and review the log. If the RAM setting still reverts,
+boot this tool again and exit with Q, then report the log and CPU-Z Memory
+frequency. Review logs before sharing. Do not post full BIOS dumps.
+
+To return to Auto while the system still boots, use M to set the OEM active
+timing switch to Auto and save, then return the AMD switch to Auto as well.
+
+This is an independent project. No ROM flashing or automatic settings save
+is performed. See LICENSE and THIRD_PARTY_NOTICES.md.

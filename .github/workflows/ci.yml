@@ -1,0 +1,32 @@
+name: Build and test
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y clang lld
+      - name: Fetch pinned EDK II headers
+        run: python3 tools/fetch_edk2.py
+      - name: Build
+        run: python3 tools/build.py
+      - name: Test
+        run: python3 tests/test_core.py
+      - name: Package and verify
+        run: |
+          python3 tools/package.py
+          python3 tools/check_release.py
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: rx16-toolkit-release-files
+          path: dist/*
+          if-no-files-found: error

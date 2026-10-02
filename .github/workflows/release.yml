@@ -1,0 +1,31 @@
+name: Draft release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Check release tag
+        run: python3 -c "import os,pathlib; assert os.environ['GITHUB_REF_NAME'] == 'v' + pathlib.Path('VERSION').read_text().strip()"
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y clang lld
+      - name: Fetch pinned EDK II headers
+        run: python3 tools/fetch_edk2.py
+      - name: Build and test
+        run: |
+          python3 tools/build.py
+          python3 tests/test_core.py
+      - name: Package and verify
+        run: |
+          python3 tools/package.py
+          python3 tools/check_release.py
+      - name: Create draft only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/draft_release.py

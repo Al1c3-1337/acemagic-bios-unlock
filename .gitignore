@@ -1,0 +1,10 @@
+/build/
+/dist/
+/.deps/
+/private-fixtures/
+__pycache__/
+*.pyc
+*.rom
+*.cap
+*.fd
+*_LOG.txt
